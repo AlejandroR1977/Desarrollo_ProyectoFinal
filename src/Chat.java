@@ -52,8 +52,9 @@ class Lamina extends JPanel implements Runnable {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            area.append("\n" + field.getText());
             try {
-                Socket miSocket = new Socket("192.168.56.1", 18);
+                Socket miSocket = new Socket("192.168.56.1", 1801);
                 PackageEnviar datos = new PackageEnviar();
                 datos.setUser(user.getText());
                 datos.setIp(ip.getText());
@@ -71,7 +72,7 @@ class Lamina extends JPanel implements Runnable {
     @Override
     public void run() {
         try {
-            ServerSocket servidorCliente = new ServerSocket(18);
+            ServerSocket servidorCliente = new ServerSocket(1802);
             Socket cliente;
             PackageEnviar paqueteRecibido;
             while (true) {

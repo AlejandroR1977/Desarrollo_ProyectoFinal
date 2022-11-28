@@ -31,7 +31,7 @@ class Panel2 extends JFrame implements Runnable {
     public void run() {
         //System.out.println("Escucho");
         try {
-            ServerSocket servidor = new ServerSocket(18);
+            ServerSocket servidor = new ServerSocket(1801);
             String user, ip, mensaje;
             PackageEnviar paqueteRecibido;
             while(true){
@@ -42,7 +42,7 @@ class Panel2 extends JFrame implements Runnable {
             ip = paqueteRecibido.getIp();
             mensaje = paqueteRecibido.getMensaje();
             field.append("\n #" + user + ": " + mensaje + "@" + ip);
-            Socket enviaDestinatario = new Socket(ip,18);
+            Socket enviaDestinatario = new Socket(ip,1802);
             ObjectOutputStream paqueteReenvio = new ObjectOutputStream(enviaDestinatario.getOutputStream());
             paqueteReenvio.writeObject(paqueteRecibido);
             paqueteReenvio.close();
