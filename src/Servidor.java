@@ -1,7 +1,10 @@
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,27 +30,60 @@ class Panel2 extends JFrame implements Runnable {
         Thread miHilo = new Thread(this);
         miHilo.start();
     }
+
     @Override
     public void run() {
         //System.out.println("Escucho");
         try {
             ServerSocket servidor = new ServerSocket(1801);
             String user, ip, mensaje;
+            ArrayList <String> ipList = new ArrayList <String>();
             PackageEnviar paqueteRecibido;
-            while(true){
-            Socket miSocket = servidor.accept();
-            ObjectInputStream paqueteDatos = new ObjectInputStream(miSocket.getInputStream());
-            paqueteRecibido = (PackageEnviar) paqueteDatos.readObject();
-            user = paqueteRecibido.getUser();
-            ip = paqueteRecibido.getIp();
-            mensaje = paqueteRecibido.getMensaje();
-            field.append("\n #" + user + ": " + mensaje + "@" + ip);
-            Socket enviaDestinatario = new Socket(ip,1802);
-            ObjectOutputStream paqueteReenvio = new ObjectOutputStream(enviaDestinatario.getOutputStream());
-            paqueteReenvio.writeObject(paqueteRecibido);
-            paqueteReenvio.close();
-            enviaDestinatario.close();
-            miSocket.close();
+            while (true) {
+                Socket miSocket = servidor.accept();
+                ObjectInputStream paqueteDatos = new ObjectInputStream(miSocket.getInputStream());
+                paqueteRecibido = (PackageEnviar) paqueteDatos.readObject();
+                user = paqueteRecibido.getUser();
+                ip = paqueteRecibido.getIp();
+                mensaje = paqueteRecibido.getMensaje();
+                if (!mensaje.equals(" *Se ha conectado*")&&!mensaje.equals(" *Se ha desconectado*")) {
+                    field.append("\n " + user + ": " + " #" + mensaje + "@" + ip);
+                    Socket enviaDestinatario = new Socket(ip, 1802);
+                    ObjectOutputStream paqueteReenvio = new ObjectOutputStream(enviaDestinatario.getOutputStream());
+                    paqueteReenvio.writeObject(paqueteRecibido);
+                    paqueteReenvio.close();
+                    enviaDestinatario.close();
+                    miSocket.close();
+                } 
+                if (mensaje.equals(" *Se ha conectado*")&&!mensaje.equals(" *Se ha desconectado*")) {
+                    InetAddress address = miSocket.getInetAddress();
+                    String remoteIp = address.getHostAddress();
+                    field.append("\n CONNECT " + remoteIp);
+                    ipList.add(remoteIp);
+                    paqueteRecibido.setIPs(ipList);
+                    for(String a:ipList){
+                    Socket enviaDestinatario = new Socket(a, 1802);
+                    ObjectOutputStream paqueteReenvio = new ObjectOutputStream(enviaDestinatario.getOutputStream());
+                    paqueteReenvio.writeObject(paqueteRecibido);
+                    paqueteReenvio.close();
+                    enviaDestinatario.close();
+                    miSocket.close();
+                    }
+                }
+                if (mensaje.equals(" *Se ha desconectado*")&&!mensaje.equals(" *Se ha conectado*")) {
+                    InetAddress address = miSocket.getInetAddress();
+                    String remoteIp = address.getHostAddress();  
+                    field.append("\n DISCONNECT " + remoteIp);
+                    ipList.remove(remoteIp);
+                    for(String a:ipList){
+                    Socket enviaDestinatario = new Socket(a, 1802);
+                    ObjectOutputStream paqueteReenvio = new ObjectOutputStream(enviaDestinatario.getOutputStream());
+                    paqueteReenvio.writeObject(paqueteRecibido);
+                    paqueteReenvio.close();
+                    enviaDestinatario.close();
+                    miSocket.close();
+                    }
+                    }
             }
         } catch (IOException | ClassNotFoundException ex) {
             ex.printStackTrace();
