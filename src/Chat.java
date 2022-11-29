@@ -133,7 +133,16 @@ class Lamina extends JPanel implements Runnable {
                 paqueteRecibido = (PackageEnviar) entrada.readObject();
                 if (!paqueteRecibido.getMensaje().equals(" *Se ha conectado*")&&!paqueteRecibido.getMensaje().equals(" *Se ha desconectado*")) {
                     area.append("\n#" + paqueteRecibido.getMensaje() + "@" + paqueteRecibido.getUser());
-                } else {
+                } 
+                if (paqueteRecibido.getMensaje().equals(" *Se ha desconectado*")&&!paqueteRecibido.getMensaje().equals(" *Se ha conectado*")) {
+                    ArrayList<String> IPsBox = new ArrayList<String>();
+                    IPsBox = paqueteRecibido.getIPs();
+                    ip.removeAllItems();
+                    for (String a : IPsBox) {
+                        ip.addItem(a);
+                    }
+                }
+                if (paqueteRecibido.getMensaje().equals(" *Se ha conectado*")&&!paqueteRecibido.getMensaje().equals(" *Se ha desconectado*")) {
                     //Aqui en lugar de un ArrayList se podria usar un HashMap para que salieran los usuarios en lugar de las ip, pero por motivos de tiempo y otras materias no puedo implementarlo.
                     ArrayList<String> IPsBox = new ArrayList<String>();
                     IPsBox = paqueteRecibido.getIPs();
@@ -142,10 +151,7 @@ class Lamina extends JPanel implements Runnable {
                         ip.addItem(a);
                     }
                 }
-                if (paqueteRecibido.getMensaje().equals(" *Se ha desconectado*")) {
-                    ArrayList<String> IPsBox = new ArrayList<String>();
-                    IPsBox = paqueteRecibido.getIPs();
-                }
+                
             }
         } catch (IOException | ClassNotFoundException ex) {
             ex.printStackTrace();
